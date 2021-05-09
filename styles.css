@@ -1,0 +1,46 @@
+* {
+    box-sizing: border-box;
+}
+
+#board {
+    /* display: inline-block; */
+    background-color: black;
+    height: 650px;
+    width: 650px;
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tile {
+    width: 80px;
+    height: 80px;
+    float: left;
+}
+
+.apricot {
+    background-color: #f6e3ce;
+}
+
+.brown {
+    background-color: brown;
+}
+
+.circle {
+    width: 75px;
+    height: 75px;
+    border-radius: 100%;
+    margin: 2.5px 2.5px;
+}
+
+.grey {
+    background-color: grey;
+}
+
+.black {
+    background-color: black;
+}
+
+.white {
+    background-color: white;
+}
