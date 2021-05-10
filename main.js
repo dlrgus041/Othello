@@ -1,5 +1,13 @@
 /* 변수 */
 
+// 누구의 차례인지 알려주는 텍스트 상자
+// 그림 + 타이머 형태의 가독성이 높은 요소로 대체될 예정
+const status = document.querySelector('#status').lastElementChild;
+
+// 잘못된 칸에 놓았으면 true, 아니면 false
+// status가 대체되면 삭제할 예정
+let wrong = false;
+
 // 게임보드
 const board = document.querySelector('#board');
 
@@ -27,6 +35,13 @@ const dir = [
 ];
 
 /* 함수 */
+
+// 턴 바꾸기
+function change() {
+    turn = !turn;
+    wrong = false;
+    status.innerText = `${turn ? '검은' : '흰'}색 돌 차례입니다.`
+}
 
 // 해당 칸의 위치를 객체로 반환
 function coor(e) { 
@@ -104,7 +119,6 @@ function action(e) {
 
         do {
             plus(pos, dir[i]);
-            console.log('search', pos);
             if (!isRightPos(pos) || !arr[pos.row][pos.col]) {
                 noStone = true;
                 break;
@@ -116,17 +130,12 @@ function action(e) {
 
         } while (true);
 
-        console.log('noStone : ', noStone);
-        console.log('moreThanZero : ', moreThanZero);
-        console.log('----------')
-
         if (noStone || !moreThanZero) continue;
 
         vaild = true;
 
         do {
             plus(pos, dir[i], false);
-            console.log('flip', pos);
 
             if (pos.row == origin.row && pos.col == origin.col) break;
             
@@ -141,16 +150,16 @@ function action(e) {
 
         if (black * white == 0) {
             alert(black ? '검은색 돌이 승리했습니다!' : '흰색 돌이 승리했습니다!');
-            alert(`한 번 더 하고싶다면'F5' 또는 '새로고침'을 누르세요.`)
-        } else if (black + white == 64) decide();
-        else turn = !turn;
+            alert(`한 번 더 하고싶다면 'F5' 또는 '새로고침'을 누르세요.`);
+        } else if (black + white == 64) {
+            alert(`검은색 돌 ${black}개, 흰색 돌 ${white}개.\n${(bleck > white) ? '검은' : '흰'}색 돌이 승리했습니다!`);
+            alert(`한 번 더 하고싶다면 'F5' 또는 '새로고침'을 누르세요.`);
+        } else change();
 
-    } else alert('해당 칸에 놓을 수 없습니다.');
-}
-
-// 승부 내기
-function decide() {
-
+    } else if (!wrong) {
+        status.innerText += `\n\n해당 칸에 놓을 수 없습니다.`;
+        wrong = true;
+    }
 }
 
 /* 핸들러 */
@@ -194,3 +203,5 @@ place({row: 3, col: 3}, true, 1);
 place({row: 3, col: 4}, true, 2);
 place({row: 4, col: 3}, true, 2);
 place({row: 4, col: 4}, true, 1);
+
+status.innerText = `검은색 돌 차례입니다.`
