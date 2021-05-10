@@ -7,20 +7,24 @@ const board = document.querySelector('#board');
 // 검은색 돌이 놓여있다면 1, 흰색 돌이 놓여있다면 2.
 const arr = Array.from(Array(8), () => Array(8).fill(0));
 
-// 8방향 탐색(시계방향 순서)
-const dir = [
-    {i: -1, j: 0},
-    {i: -1, j: 1},
-    {i: 0, j: 1},
-    {i: 1, j: 1},
-    {i: 1, j: 0},
-    {i: 1, j: -1},
-    {i: 0, j: -1},
-    {i: -1, j: -1},
-];
+// 색깔별 현재 돌의 개수
+let black = 0;
+let white = 0;
 
 // true : 검정색, false : 흰색
 let turn = true;
+
+// 8방향 탐색(시계방향 순서)
+const dir = [
+    {i: -1, j: 0},  // 북
+    {i: -1, j: 1},  // 북동
+    {i: 0, j: 1},   // 동
+    {i: 1, j: 1},   // 남동
+    {i: 1, j: 0},   // 남
+    {i: 1, j: -1},  // 남서
+    {i: 0, j: -1},  // 서
+    {i: -1, j: -1}, // 북서
+];
 
 /* 함수 */
 
@@ -40,15 +44,25 @@ function place({row, col}, flag = false, color = 0) {
     if (flag) {
         if (color) {
             stone.classList.add((color < 2) ? 'black' : 'white');
+            (color < 2) ? black++ : white++;
             arr[row][col] = color;
         } else {
             stone.classList.add(turn ? 'black' : 'white');
+            turn ? black++ : white++;
             arr[row][col] = (turn ? 1 : 2);
         }
     } else {
         stone.classList.toggle('black');
         stone.classList.toggle('white');
         arr[row][col] = 3 - arr[row][col];
+
+        if (turn) {
+            black++;
+            white--;
+        } else {
+            black--;
+            white++;
+        }
     }
 }
 
@@ -78,34 +92,65 @@ function isRightPos({row, col}) {
 
 // 돌을 놓은 후(마우스 클릭 후) 상대 돌 뒤집기 후 턴 넘김
 function action(e) {
+    
+    let vaild = false;
     const origin = coor(e);
-    place(origin, true);
 
     for (let i = 0; i < 8; i++) {
 
         let noStone = false;
+        let moreThanZero = false;
         let pos = { ...origin };
 
         do {
             plus(pos, dir[i]);
+            console.log('search', pos);
             if (!isRightPos(pos) || !arr[pos.row][pos.col]) {
                 noStone = true;
                 break;
             }
+
             if (arr[pos.row][pos.col] == (turn ? 1 : 2)) break;
+
+            moreThanZero = true;
 
         } while (true);
 
-        if (noStone) continue;
+        console.log('noStone : ', noStone);
+        console.log('moreThanZero : ', moreThanZero);
+        console.log('----------')
+
+        if (noStone || !moreThanZero) continue;
+
+        vaild = true;
 
         do {
             plus(pos, dir[i], false);
-            if (pos.row == origin.row && pos.col == origin.col) break;
             console.log('flip', pos);
-            place(pos);
-        } while (true);
 
+            if (pos.row == origin.row && pos.col == origin.col) break;
+            
+            place(pos);
+        
+        } while (true);
     }
+
+    if (vaild) {
+
+        place(origin, true);
+
+        if (black * white == 0) {
+            alert(black ? '검은색 돌이 승리했습니다!' : '흰색 돌이 승리했습니다!');
+            alert(`한 번 더 하고싶다면'F5' 또는 '새로고침'을 누르세요.`)
+        } else if (black + white == 64) decide();
+        else turn = !turn;
+
+    } else alert('해당 칸에 놓을 수 없습니다.');
+}
+
+// 승부 내기
+function decide() {
+
 }
 
 /* 핸들러 */
@@ -120,7 +165,6 @@ function hover(e) {
 function click(e) {
     if (isStone(e)) return;
     action(e);
-    turn = !turn;
 }
 
 /* 실행 */
